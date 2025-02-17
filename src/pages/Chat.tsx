@@ -1,10 +1,5 @@
 import { useParams } from 'react-router';
-import {
-  useCreateMessage,
-  useGetChat,
-  useGetMessage,
-  useMessageCreated,
-} from '../hooks';
+import { useCreateMessage, useGetChat, useGetMessage } from '../hooks';
 import { FormEvent, useState, useEffect, useRef } from 'react';
 import { Avatar } from '../components';
 import { Message } from '../gql/graphql';
@@ -17,10 +12,14 @@ const Chat = () => {
   const [createMessage] = useCreateMessage();
   const { data: existingMessages } = useGetMessage({ chatId });
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  console.log('TEMP DATA ');
+  console.log(data?.chat);
 
-  //Subscription
-  useMessageCreated({ chatId });
+  const { name, latestMessages } = data?.chat ?? {};
+
+  const { firstName } = latestMessages?.user ?? {};
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -63,7 +62,7 @@ const Chat = () => {
     <div className='flex flex-col h-screen w-full px-10 shadow-2xl'>
       {/* Chat Name - Fixed at the Top */}
       <div className='py-4 bg-white shadow-md text-center sticky top-0 z-10'>
-        <h1 className='text-2xl sm:text-3xl font-bold'>{data?.chat.name}</h1>
+        <h1 className='text-2xl sm:text-3xl font-bold'>{name}</h1>
       </div>
 
       {/* Wrapper to Ensure Scrolling Works Properly */}
@@ -76,7 +75,7 @@ const Chat = () => {
           )
           .map((message) => (
             <div key={message._id} className='flex items-start gap-2.5'>
-              <Avatar name={data?.chat.name ?? ''} />
+              <Avatar name={firstName ?? ''} />
               <div className='flex flex-col w-full max-w-[320px] p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700 cursor-pointer'>
                 <div className='flex items-center space-x-2 rtl:space-x-reverse'>
                   <span className='text-sm font-normal text-gray-500 dark:text-gray-400'>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChatItem } from '../elements';
 import { AddChatList } from '../modals';
-import { useGetChats } from '../../hooks';
+import { useGetChats, useMessageCreated } from '../../hooks';
 import { useNavigate, useParams } from 'react-router';
 
 interface ChatListProps {
@@ -15,6 +15,8 @@ const ChatList = ({ setViewChatList, viewChatList }: ChatListProps) => {
   const { data } = useGetChats();
   const params = useParams();
   const chatId = params._id ?? '';
+
+  useMessageCreated({ chatIds: data?.chats.map((c) => c._id) ?? [] });
 
   // Close chat list on mobile when a chat is selected
   const handleChatClick = (id: string) => {
@@ -62,20 +64,31 @@ const ChatList = ({ setViewChatList, viewChatList }: ChatListProps) => {
 
       {/* Scrollable Chat List */}
       <div className='flex-1 overflow-y-auto p-1 space-y-2 bg-gray-100 max-h-full'>
-        {data?.chats
-          .map((chat) => (
-            <div
-              key={chat._id}
-              className='cursor-pointer p-2 rounded-md hover:bg-gray-200 transition'
-              onClick={() => handleChatClick(chat._id)}
-            >
-              <ChatItem
-                name={chat.name}
-                isSelected={chat?._id !== undefined && chat._id === chatId}
-              />
-            </div>
-          ))
-          .reverse()}
+        {data?.chats &&
+          [...data.chats]
+            .sort((chatA, chatB) => {
+              if (!chatA.latestMessages) {
+                return -1;
+              }
+              return (
+                new Date(chatA.latestMessages?.createdAt).getTime() -
+                new Date(chatB.latestMessages?.createdAt).getTime()
+              );
+            })
+            .map((chat) => (
+              <div
+                key={chat._id}
+                className='cursor-pointer p-2 rounded-md hover:bg-gray-200 transition'
+                onClick={() => handleChatClick(chat._id)}
+              >
+                <ChatItem
+                  name={chat.name}
+                  isSelected={chat?._id !== undefined && chat._id === chatId}
+                  latestMessages={chat.latestMessages}
+                />
+              </div>
+            ))
+            .reverse()}
       </div>
 
       {/* Conditionally Render Modal */}

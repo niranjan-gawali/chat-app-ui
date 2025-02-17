@@ -7,7 +7,6 @@ interface AddChatListProps {
 }
 
 const AddChatList: React.FC<AddChatListProps> = ({ onClose }) => {
-  const [isPrivate, setIsPrivate] = useState(false);
   const [recipient, setRecipient] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [createChat, { error: apiError }] = useCreateChat();
@@ -22,7 +21,7 @@ const AddChatList: React.FC<AddChatListProps> = ({ onClose }) => {
     try {
       const chat = await createChat({
         variables: {
-          createChatInput: { isPrivate, name: recipient },
+          createChatInput: { name: recipient },
         },
       });
       setError(null);
@@ -49,23 +48,16 @@ const AddChatList: React.FC<AddChatListProps> = ({ onClose }) => {
 
         {/* Private/Public Toggle */}
         <div className='mt-4 flex items-center justify-between'>
-          <span className='font-semibold'>
-            {isPrivate ? 'Private' : 'Public'}
-          </span>
+          <span className='font-semibold'>{'Public'}</span>
           <div
-            className={`w-14 h-7 flex items-center rounded-full p-1 cursor-pointer transition-all ${
-              isPrivate ? 'bg-blue-600' : 'bg-gray-300'
-            }`}
+            className={`w-14 h-7 flex items-center rounded-full p-1 cursor-pointer transition-all ${'bg-gray-300'}`}
             onClick={() => {
-              setIsPrivate(!isPrivate);
               setRecipient('');
               setError(null);
             }}
           >
             <div
-              className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all ${
-                isPrivate ? 'translate-x-7' : 'translate-x-0'
-              }`}
+              className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all ${'translate-x-0'}`}
             ></div>
           </div>
         </div>
@@ -76,9 +68,7 @@ const AddChatList: React.FC<AddChatListProps> = ({ onClose }) => {
           className={`w-full border rounded-lg p-2 mt-3 ${
             error ? 'border-red-500' : ''
           }`}
-          placeholder={
-            isPrivate ? 'Search for a person...' : 'Enter recipient name...'
-          }
+          placeholder={'Enter recipient name...'}
           value={recipient}
           onChange={(e) => {
             setRecipient(e.target.value);
